@@ -1,14 +1,14 @@
 <template>
   <div class="about">
-    <h1>{{id ? '编辑' : '新建'}}物品</h1>
+    <h1>{{id ? '编辑' : '新建'}}英雄</h1>
     <el-form label-width="120px" @submit.native.prevent="save">
       <el-form-item label="名称">
         <el-input v-model="model.name"></el-input>
       </el-form-item>
-      <el-form-item label="图标">
+      <el-form-item label="头像">
         <el-upload class="avatar-uploader" :action="$http.defaults.baseURL + '/upload'" :show-file-list="false"
           :on-success="afterUpload">
-          <img v-if="model.icon" :src="model.icon" class="avatar">
+          <img v-if="model.avatar" :src="model.avatar" class="avatar">
           <i v-else class="el-icon-plus avatar-uploader-icon"></i>
         </el-upload>
       </el-form-item>
@@ -27,7 +27,10 @@
     },
     data() {
       return {
-        model: {}
+        model: {
+			name: '',
+			avatar: ''
+		}
       };
     },
     methods: {
@@ -35,8 +38,8 @@
         console.log(res)
         // 此内容涉及到内容的响应式的问题
         // Vue有一个显示赋值的方法，第一个参数是赋值的数据主体是谁，第二个参数是要给它赋值的属性是什么，第三个参数就是 res.url(建议使用此方法)
-        this.$set(this.model,'icon',res.url)
-        this.model.icon = res.url
+        // this.$set(this.model,'avatar',res.url)
+        this.model.avatar = res.url
       },
       // 保存的时候需要做条件判断，新建和编辑它们之间有两个地方不同
       // 1、post方法；2、路径不同；新建的时候是post，修改的时候是put
@@ -45,12 +48,12 @@
         // 可以将异步的回调函数的写法换成类似同步的写法，await本身也可以返回 promise
         let res
         if (this.id) {
-          res = await this.$http.put(`rest/items/${this.id}`, this.model)
+          res = await this.$http.put(`rest/heroes/${this.id}`, this.model)
         } else {
-          res = await this.$http.post('rest/items', this.model)
+          res = await this.$http.post('rest/heroes', this.model)
         }
-        // 跳转到分页列表(/items/list)
-        this.$router.push('/items/list')
+        // 跳转到分页列表(/heroes/list)
+        this.$router.push('/heroes/list')
         // 用于提示，是否保存成功
         this.$message({
           type: 'success',
@@ -58,7 +61,7 @@
         })
       },
       async fetch() {
-        const res = await this.$http.get(`rest/items/${this.id}`)
+        const res = await this.$http.get(`rest/heroes/${this.id}`)
         this.model = res.data
       },
       // 获取父级的选项
