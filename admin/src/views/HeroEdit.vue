@@ -14,9 +14,16 @@
             <el-upload class="avatar-uploader" :action="$http.defaults.baseURL + '/upload'" :show-file-list="false"
               :on-success="afterUpload">
               <img v-if="model.avatar" :src="model.avatar" class="avatar">
-              <i v-else class="el-icon-plus"></i>
+              <i v-else class="el-icon-plus avatar-uploader-icon"></i>
             </el-upload>
           </el-form-item>
+          <!-- <el-form-item label="头像">
+            <el-upload class="avatar-uploader" :action="$http.defaults.baseURL + '/upload'" :show-file-list="false"
+              :on-success="afterUpload">
+              <img v-if="model.avatar" :src="model.avatar" class="avatar">
+              <i v-else class="el-icon-plus"></i>
+            </el-upload>
+          </el-form-item> -->
           <el-form-item label="类型">
             <el-select v-model="model.categories" multiple>
               <el-option v-for="item of categories" :key="item._id" :label="item.name" :value="item._id"></el-option>

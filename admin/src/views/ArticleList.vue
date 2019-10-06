@@ -3,7 +3,6 @@
     <h1>文章列表</h1>
     <el-table :data="items">
       <el-table-column prop="_id" label="ID" width="240"></el-table-column>
-      <!-- 最后不要写成输入框的形式来选择父级，这样子会形成数据冗余 -->
       <el-table-column prop="title" label="标题"></el-table-column>
        <el-table-column
             fixed="right"
