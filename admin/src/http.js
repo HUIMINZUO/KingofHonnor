@@ -8,7 +8,6 @@ const http = axios.create({
 http.interceptors.response.use(res => {
   return res
 }, err => {
-  // console.log(err.response.data.message)
   if (err.response.data.message) {
     Vue.prototype.$message({
       type: 'error',
@@ -18,5 +17,4 @@ http.interceptors.response.use(res => {
   
   return Promise.reject(err)
 })
-
 export default http

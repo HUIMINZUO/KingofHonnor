@@ -1,10 +1,10 @@
 module.exports = app => {
 	const express = require('express')
 	// 合并参数
+	// const bcrypt = require('bcryptjs')
 	const router = express.Router({
 		mergeParams: true
 	})
-	// const req.Model = require('../../models/req.Model')
 	router.post('/',async (req,res) => {
 		const model = await req.Model.create(req.body)
 		res.send(model)
@@ -51,17 +51,30 @@ module.exports = app => {
 		res.send(file)
 	})
 	
-	app.post('/admin/api/login',async (req, res) => {
-		// res.send('ok')
-		const { username,password } = req.body
-		// 1、根据用户找到用户名
+	app.post('/admin/api/login', async (req, res) => {
+		// res.send('欧克')
+		const { username, password } = req.body
+		
+		// 1.根据用户名找用户
 		const AdminUser = require('../../models/AdminUser')
-		const user = await AdminUser.findOne({username})
-		// 用户不存在要执行的代码段
+		const user = await AdminUser.findOne({ username }).select('+ password')
 		if (!user) {
 			return res.status(422).send({
 				message: '用户不存在'
 			})
 		}
+		// 比较铭文和密文是否匹配(密码的校验)
+		const isValid = require('bcrypt').compareSync(password, user.password)
+		if (!isValid) {
+			return res.status(422).send({
+				message: '密码错误'
+			})
+		}
+		// 账号和密码都正确的话就返回
+		const jwt = require('jsonwebtoken')
+		const token = jwt.sign({ id: user._id},app.get('secret'))
+		res.send({token})	
 	})
 }
+
+// compareSync

@@ -17,24 +17,35 @@
   </div>
 </template>
 <script>
-  export default {
-    data(){
-      return {
-        model: {}
-      }
-    },
-    methods: {
-      async login(){
-        const res = await this.$http.post('login',this.model)
-        console.log(res.data)
-      }
+export default {
+  data(){
+    return {
+      model: {}
+    }
+  },
+  methods: {
+    // login(){
+    //   console.log(this.model)
+    // }
+    async login(){
+      const res = await this.$http.post('login', this.model)
+      console.log(res.data)
+      // 当前窗口关闭了的话呢,里面的数据就消失了
+      // sessionStorage.token = res.data.token
+      localStorage.token = res.data.token
+      this.$router.push('/')
+      this.$message({
+        type: 'success',
+        message: '登录成功'
+      })
     }
   }
+}
 </script>
 
 <style>
-  .login-card{
-    width: 25rem;
-    margin: 5rem auto;
-  }
+.login-card{
+  width: 25rem;
+  margin: 5rem auto;
+}
 </style>
