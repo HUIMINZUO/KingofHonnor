@@ -50,4 +50,18 @@ module.exports = app => {
 		file.url = `http://localhost:3000/uploads/${file.filename}`
 		res.send(file)
 	})
+	
+	app.post('/admin/api/login',async (req, res) => {
+		// res.send('ok')
+		const { username,password } = req.body
+		// 1、根据用户找到用户名
+		const AdminUser = require('../../models/AdminUser')
+		const user = await AdminUser.findOne({username})
+		// 用户不存在要执行的代码段
+		if (!user) {
+			return res.status(422).send({
+				message: '用户不存在'
+			})
+		}
+	})
 }
