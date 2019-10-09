@@ -4,6 +4,16 @@ import Vue from 'vue'
 const http = axios.create({
   baseURL: 'http://localhost:3000/admin/api'
 })
+// 添加一个拦截器
+http.interceptors.request.use(function (config) {
+    // Do something before request is sent
+    // Bearer就是一个行业内的一个规范
+    config.headers.Authorization = 'Bearer ' + localStorage.token
+    return config;
+  }, function (error) {
+    // Do something with request error
+    return Promise.reject(error);
+  });
 
 http.interceptors.response.use(res => {
   return res
@@ -14,7 +24,7 @@ http.interceptors.response.use(res => {
       message: err.response.data.message
     })
   }
-  
+
   return Promise.reject(err)
 })
 export default http

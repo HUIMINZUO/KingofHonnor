@@ -1,28 +1,43 @@
 module.exports = app => {
 	const express = require('express')
+	const jwt = require('jsonwebtoken')
+	const AdminUser = require('../../models/AdminUser')
 	// 合并参数
 	// const bcrypt = require('bcryptjs')
 	const router = express.Router({
 		mergeParams: true
 	})
+	// 创建资源接口
 	router.post('/',async (req,res) => {
 		const model = await req.Model.create(req.body)
 		res.send(model)
 	})
-	// 修改详情
+	// 修改详情（更新资源接口）
 	router.put('/:id',async (req,res) => {
 		const model = await req.Model.findByIdAndUpdate(req.params.id,req.body)
 		res.send(model)
 	})
-	// 删除接口(后端接口)
+	// 删除接口(后端接口)删除资源接口
 	router.delete('/:id',async (req,res) => {
 		await req.Model.findByIdAndDelete(req.params.id,req.body)
 		res.send({
 			success: true
 		})
 	})
-	// 创建分类
-	router.get('/',async (req,res) => {
+	// （资源列表）创建分类
+	router.get('/',async (req, res, next) => {
+		// 此操作用于校验用户是否登录
+		// 第一步，获取用户的信息
+		// const token = req.headers.authorization
+		const token = String(req.headers.authorization || '').split(' ').pop()
+		// const tokenData = jwt.verify(token, app.get('secret'))
+		const { id } = jwt.verify(token, app.get('secret'))
+		req.user = await AdminUser.findById(id)
+		console.log(req.user)
+		// console.log(token)
+		// console.log(tokenData)
+		await next()
+	},async (req,res) => {
 		const queryOptions = {}
 		if (req.Model.modelName === 'Category') {
 			queryOptions.populate = 'parent'
@@ -31,7 +46,7 @@ module.exports = app => {
 		res.send(items)
 	})
 	
-	// 获取详情接口（后端的）
+	// （资源详情接口）获取详情接口（后端的）
 	router.get('/:id',async (req,res) => {
 		const model = await req.Model.findById(req.params.id)
 		res.send(model)
@@ -56,7 +71,7 @@ module.exports = app => {
 		const { username, password } = req.body
 		
 		// 1.根据用户名找用户
-		const AdminUser = require('../../models/AdminUser')
+		// const AdminUser = require('../../models/AdminUser')
 		const user = await AdminUser.findOne({ username }).select('+ password')
 		if (!user) {
 			return res.status(422).send({
@@ -71,7 +86,7 @@ module.exports = app => {
 			})
 		}
 		// 账号和密码都正确的话就返回
-		const jwt = require('jsonwebtoken')
+		// const jwt = require('jsonwebtoken')
 		const token = jwt.sign({ id: user._id},app.get('secret'))
 		res.send({token})	
 	})

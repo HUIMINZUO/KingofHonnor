@@ -35,3 +35,57 @@
 ## 错题(坑): 之前一直再改'登录'的问题(密码有误一直显示不出来),后来突然发现是自己掉进自己设的坑里面去了
 ## 原来登录的账号和密码是要和管理员页面设置的账号和密码一致,当时就是没有意识到,所以浪费了好几个小时
 ## 还好,问题找到,加油,虽然是看着教学视频学习的,但是也得努力向前看
+
+### 日期：2019-10-08-11 11：30
+### 此次的任务要求：服务端的登录校验
+
+## 没有 token 就不允许访问
+
+# 服务端登录校验
+## 添加一个拦截器（server/routes/admin/index.js）
+```
+// Add a request interceptor
+axios.interceptors.request.use(function (config) {
+    // Do something before request is sent
+    return config;
+  }, function (error) {
+    // Do something with request error
+    return Promise.reject(error);
+  });
+```
+
+## Berar 就是行业内的一个规范
+
+## const token = req.headers.authorization
+![](Test_files/5.jpg)
+
+## const token = String(req.headers.authorization || '').split(' ').pop()
+![](Test_files/7.jpg)
+
+```
+const tokenData = jwt.verify(token, app.get('secret'))
+		// console.log(token)
+		console.log(tokenData)
+		
+```
+![](Test_files/8.jpg)
+dos命令输出的那个 ID 和 iat 就是 上图中管理员的账号
+我们可以通过用户的ID 来删除token，也可以使用token来解析ID
+![](Test_files/6.jpg)
+
+```
+router.get('/',async (req, res, next) => {
+		// 此操作用于校验用户是否登录
+		// 第一步，获取用户的信息
+		// const token = req.headers.authorization
+		const token = String(req.headers.authorization || '').split(' ').pop()
+		// const tokenData = jwt.verify(token, app.get('secret'))
+		const { id } = jwt.verify(token, app.get('secret'))
+		<!-- 服务端请求的时候，知道用户端是谁 -->
+		req.user = await AdminUser.findById(id)
+		console.log(req.user)
+		// console.log(token)
+		// console.log(tokenData)
+		await next()
+```
+![](Test_files/9.jpg)
