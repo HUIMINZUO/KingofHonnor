@@ -1,6 +1,7 @@
 module.exports = app => {
 	const express = require('express')
 	const jwt = require('jsonwebtoken')
+	const assert = require('http-assert')
 	const AdminUser = require('../../models/AdminUser')
 	// 合并参数
 	// const bcrypt = require('bcryptjs')
@@ -31,11 +32,14 @@ module.exports = app => {
 		// const token = req.headers.authorization
 		const token = String(req.headers.authorization || '').split(' ').pop()
 		// const tokenData = jwt.verify(token, app.get('secret'))
+		assert(token, 401, '请先登录')
 		const { id } = jwt.verify(token, app.get('secret'))
+		assert(id, 401, '请先登录')
 		req.user = await AdminUser.findById(id)
 		console.log(req.user)
 		// console.log(token)
 		// console.log(tokenData)
+		assert(req.user, 401, '请先登录')
 		await next()
 	},async (req,res) => {
 		const queryOptions = {}
@@ -73,22 +77,33 @@ module.exports = app => {
 		// 1.根据用户名找用户
 		// const AdminUser = require('../../models/AdminUser')
 		const user = await AdminUser.findOne({ username }).select('+ password')
-		if (!user) {
-			return res.status(422).send({
-				message: '用户不存在'
-			})
-		}
+		assert(user,422,'用户不存在')
+		// if (!user) {
+		// 	return res.status(422).send({
+		// 		message: '用户不存在'
+		// 	})
+		// }
 		// 比较铭文和密文是否匹配(密码的校验)
 		const isValid = require('bcrypt').compareSync(password, user.password)
-		if (!isValid) {
-			return res.status(422).send({
-				message: '密码错误'
-			})
-		}
+		assert(isValid, 422, '密码错误')
+		// if (!isValid) {
+		// 	return res.status(422).send({
+		// 		message: '密码错误'
+		// 	})
+		// }
 		// 账号和密码都正确的话就返回
 		// const jwt = require('jsonwebtoken')
 		const token = jwt.sign({ id: user._id},app.get('secret'))
 		res.send({token})	
+	})
+	
+	// 错误处理函数
+	app.use(async (err, req, res, next) => {
+		// console.log(err)
+		res.status(err.statusCode || 500).send({
+		// res.status(500).send({
+			message: err.message
+		})
 	})
 }
 
